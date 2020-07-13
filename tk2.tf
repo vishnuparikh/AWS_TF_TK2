@@ -1,3 +1,9 @@
+//Vishnu Parikh
+//github repo: https://github.com/vishnuparikh/AWS_TF_TK2.git
+
+
+//user and variables//
+
 provider "aws" {
   region     = "ap-south-1"
   profile    = "vmp"
@@ -30,6 +36,10 @@ variable "environment_tag" {
   default = "Production"
 
 }
+
+
+//creation private and public vpc//
+
 resource "aws_vpc" "vpc" {
   cidr_block = "${var.cidr_vpc}"
   enable_dns_support   = true
@@ -63,6 +73,10 @@ resource "aws_subnet" "private_subnet" {
   }
 
 }
+
+
+//creation Public facing internet gateway//
+
 resource "aws_internet_gateway" "InterNetGateWay" {
   vpc_id = "${aws_vpc.vpc.id}"
   tags ={
@@ -71,6 +85,8 @@ resource "aws_internet_gateway" "InterNetGateWay" {
   }
 
 }
+//creation routing table//
+
 resource "aws_route_table" "public_route" {
   vpc_id = "${aws_vpc.vpc.id}"
 route {
@@ -87,16 +103,12 @@ resource "aws_route_table_association" "subnet_public" {
   subnet_id      = "${aws_subnet.public_subnet.id}"
   route_table_id = "${aws_route_table.public_route.id}"
 }
-
-
-
-
-
 resource "aws_route_table_association" "public_route_subnet" {
   subnet_id      = "${aws_subnet.public_subnet.id}"
   route_table_id = "${aws_route_table.public_route.id}"
 }
 
+//creation of security group for wordpress and mysql//
 
 resource "aws_security_group" "sg_wp" {
   name = "sg_wordpress"
@@ -153,6 +165,9 @@ resource "aws_security_group" "sg_mysql" {
   }
 
 }
+
+//creation of 2 insatnce wordpress and mysql//
+
 resource "aws_instance" "WP_Instance1" {
   ami           = "ami-000cbce3e1b899ebd"
   instance_type = "t2.micro"
@@ -161,7 +176,7 @@ resource "aws_instance" "WP_Instance1" {
   key_name = "key1"
  tags ={
     Environment = "${var.environment_tag}"
-    Name= "OS_wordpress"
+    Name= "wordpress_OS"
   }
 
 }
@@ -173,6 +188,6 @@ resource "aws_instance" "MYSQL_Instance2" {
   key_name = "key1"
  tags ={
     Environment = "${var.environment_tag}"
-    Name= "OS_mysql"
+    Name= "mysql_OS"
   }
 }
